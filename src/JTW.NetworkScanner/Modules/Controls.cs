@@ -180,16 +180,20 @@ public class RouteMap : ContentControl
         return r.ReadToEnd();
     }
 
-    private static string BuildHtml() => $$"""
+    private static string BuildHtml() => MapHtmlTemplate
+        .Replace("/*LEAFLET_CSS*/", ReadResource("leaflet.css"))
+        .Replace("/*LEAFLET_JS*/", ReadResource("leaflet.js"));
+
+    private const string MapHtmlTemplate = """
 <!DOCTYPE html><html><head><meta charset="utf-8">
-<style>{{ReadResource("leaflet.css")}}
+<style>/*LEAFLET_CSS*/
 html,body,#map{height:100%;margin:0;background:#0F1623;font-family:Segoe UI,sans-serif}
 .hop{background:#00B4FF;color:#0B1220;border-radius:50%;width:22px;height:22px;line-height:22px;text-align:center;font-weight:700;font-size:11px;border:2px solid #fff;box-shadow:0 0 8px #00B4FF}
 .hop.src{background:#2ECC71;box-shadow:0 0 8px #2ECC71}.hop.dst{background:#F5A623;box-shadow:0 0 10px #F5A623}
 .leaflet-popup-content{font-size:12px}
 @keyframes dash{to{stroke-dashoffset:-40}} .live{animation:dash 1.2s linear infinite}
 </style>
-<script>{{ReadResource("leaflet.js")}}</script></head><body><div id="map"></div>
+<script>/*LEAFLET_JS*/</script></head><body><div id="map"></div>
 <script>
 var map=L.map('map',{worldCopyJump:true}).setView([30,0],2);
 L.tileLayer('https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png',{maxZoom:19,subdomains:'abcd',
