@@ -1,0 +1,38 @@
+<local:ModuleWindowBase x:Class="JTW.NetworkScanner.Modules.WakeOnLanWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:JTW.NetworkScanner.Modules"
+        Title="Wake-on-LAN" Width="620" Height="440" MinWidth="520" MinHeight="360">
+    <Grid Margin="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="130" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <TextBlock Grid.ColumnSpan="2" TextWrapping="Wrap" Style="{StaticResource SubText}" Margin="0,0,0,10"
+                   Text="Sends a magic packet to wake a sleeping or powered-off PC. Wake-on-LAN must be enabled in the target's BIOS/UEFI and network adapter settings." />
+        <Label Grid.Row="1" Content="MAC address" />
+        <TextBox x:Name="MacBox" Grid.Row="1" Grid.Column="1" ToolTip="e.g. AA:BB:CC:DD:EE:FF" />
+        <Label Grid.Row="2" Content="Name (optional)" />
+        <TextBox x:Name="NameBox" Grid.Row="2" Grid.Column="1" />
+        <Label Grid.Row="3" Content="Broadcast / port" />
+        <StackPanel Grid.Row="3" Grid.Column="1" Orientation="Horizontal">
+            <TextBox x:Name="BroadcastBox" Width="160" Text="255.255.255.255" />
+            <TextBox x:Name="PortBox" Width="60" Text="9" />
+        </StackPanel>
+        <StackPanel Grid.Row="4" Grid.Column="1" Orientation="Horizontal" Margin="0,8">
+            <Button Content="⏻  Send magic packet" Style="{StaticResource AccentButton}" Click="Send_Click" />
+            <Button Content="Export…" Click="Export_Click" />
+        </StackPanel>
+        <ListBox x:Name="HistoryList" Grid.Row="5" Grid.ColumnSpan="2" Background="{StaticResource PanelBrush}"
+                 Foreground="{StaticResource TextBrush}" BorderThickness="0" FontFamily="Consolas" />
+    </Grid>
+</local:ModuleWindowBase>

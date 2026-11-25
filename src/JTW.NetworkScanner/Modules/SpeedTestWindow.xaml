@@ -1,0 +1,74 @@
+<local:ModuleWindowBase x:Class="JTW.NetworkScanner.Modules.SpeedTestWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:JTW.NetworkScanner.Modules"
+        Title="LAN Speed Test" Width="960" Height="660">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+        <TextBlock TextWrapping="Wrap" Style="{StaticResource SubText}" Margin="0,0,0,10"
+                   Text="Measures throughput between two PCs on your network — no iperf needed. Run this app on the other PC, open LAN Speed Test → Server and press Start server. Then on this PC enter that PC's IP under Client and run the test." />
+        <TabControl Grid.Row="1">
+            <TabItem Header="Client (run test)">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                        <RowDefinition Height="150" />
+                    </Grid.RowDefinitions>
+                    <DockPanel>
+                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                            <Button x:Name="RunButton" Content="▶  Run test" Style="{StaticResource AccentButton}" MinWidth="100" Click="Run_Click" />
+                            <Button Content="Export…" Click="Export_Click" />
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal">
+                            <Label Content="Server" />
+                            <TextBox x:Name="HostBox" Width="180" />
+                            <Label Content="   Port" />
+                            <TextBox x:Name="PortBox" Width="60" />
+                            <Label Content="   Seconds" />
+                            <TextBox x:Name="SecondsBox" Width="45" Text="10" />
+                            <RadioButton x:Name="DirBoth" Content="Both" GroupName="Dir" IsChecked="True" Style="{StaticResource SegmentRadio}" Margin="14,0,0,0" />
+                            <RadioButton x:Name="DirUp" Content="Upload" GroupName="Dir" Style="{StaticResource SegmentRadio}" />
+                            <RadioButton x:Name="DirDown" Content="Download" GroupName="Dir" Style="{StaticResource SegmentRadio}" />
+                        </StackPanel>
+                    </DockPanel>
+                    <UniformGrid Grid.Row="1" Rows="1" Margin="0,10">
+                        <Border Style="{StaticResource Card}" Margin="0,0,6,0"><StackPanel><TextBlock Text="Upload (this PC → server)" Style="{StaticResource SubText}" /><TextBlock x:Name="UpText" Text="—" Style="{StaticResource StatValue}" FontSize="26" /></StackPanel></Border>
+                        <Border Style="{StaticResource Card}" Margin="0,0,6,0"><StackPanel><TextBlock Text="Download (server → this PC)" Style="{StaticResource SubText}" /><TextBlock x:Name="DownText" Text="—" Style="{StaticResource StatValue}" FontSize="26" /></StackPanel></Border>
+                        <Border Style="{StaticResource Card}"><StackPanel><TextBlock Text="Now" Style="{StaticResource SubText}" /><TextBlock x:Name="NowText" Text="—" Style="{StaticResource StatValue}" FontSize="26" /></StackPanel></Border>
+                    </UniformGrid>
+                    <local:LiveGraph x:Name="Graph" Grid.Row="2" Unit="Mbps" MaxSamples="60" />
+                    <DataGrid x:Name="HistoryGrid" Grid.Row="3" Margin="0,8,0,0">
+                        <DataGrid.Columns>
+                            <DataGridTextColumn Header="Time" Binding="{Binding Time, StringFormat='yyyy-MM-dd HH:mm:ss'}" Width="150" />
+                            <DataGridTextColumn Header="Server" Binding="{Binding Server}" Width="*" />
+                            <DataGridTextColumn Header="Direction" Binding="{Binding Direction}" Width="100" />
+                            <DataGridTextColumn Header="Duration" Binding="{Binding Seconds}" Width="80" />
+                            <DataGridTextColumn Header="Mbps" Binding="{Binding Mbps, StringFormat=0.0}" Width="100" />
+                        </DataGrid.Columns>
+                    </DataGrid>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Server (listen)">
+                <Grid Margin="10">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="Auto" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <StackPanel Orientation="Horizontal">
+                        <Label Content="Listen port" />
+                        <TextBox x:Name="ServerPortBox" Width="70" />
+                        <Button x:Name="ServerButton" Content="▶  Start server" Style="{StaticResource AccentButton}" MinWidth="120" Click="Server_Click" />
+                    </StackPanel>
+                    <TextBlock x:Name="LocalIpsText" Grid.Row="1" Style="{StaticResource SubText}" Margin="0,8" TextWrapping="Wrap" />
+                    <ListBox x:Name="ServerLog" Grid.Row="2" Background="{StaticResource PanelBrush}" Foreground="{StaticResource TextBrush}" BorderThickness="0" FontFamily="Consolas" />
+                </Grid>
+            </TabItem>
+        </TabControl>
+    </Grid>
+</local:ModuleWindowBase>

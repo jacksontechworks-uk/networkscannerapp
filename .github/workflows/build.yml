@@ -1,0 +1,67 @@
+name: Build & Release
+
+on:
+  push:
+    branches: [main]
+    tags: ['v*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: windows-latest
+    env:
+      ASSET: JTW-NetworkScanner-win-x64.zip
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: 8.0.x
+
+      - name: Work out version
+        id: ver
+        shell: pwsh
+        run: |
+          if ("${{ github.ref_type }}" -eq "tag") {
+            $v = "${{ github.ref_name }}".TrimStart('v')
+          } else {
+            [xml]$proj = Get-Content src/JTW.NetworkScanner/JTW.NetworkScanner.csproj
+            $v = ($proj.Project.PropertyGroup | Where-Object { $_.Version } | Select-Object -First 1).Version
+          }
+          "version=$v" >> $env:GITHUB_OUTPUT
+          Write-Host "Building version $v"
+
+      - name: Publish (self-contained single exe)
+        run: dotnet publish src/JTW.NetworkScanner/JTW.NetworkScanner.csproj -c Release -r win-x64 --self-contained true -p:Version=${{ steps.ver.outputs.version }} -o publish
+
+      - name: Package
+        shell: pwsh
+        run: |
+          New-Item -ItemType Directory dist | Out-Null
+          Copy-Item publish/* dist/ -Exclude *.pdb -Recurse
+          Copy-Item README.md dist/
+          Get-ChildItem dist | Format-Table Name, Length
+          Compress-Archive -Path dist/* -DestinationPath $env:ASSET
+          $hash = (Get-FileHash $env:ASSET -Algorithm SHA256).Hash.ToLower()
+          "$hash  $env:ASSET" | Out-File -Encoding ascii "$env:ASSET.sha256"
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: JTW-NetworkScanner-win-x64
+          path: |
+            ${{ env.ASSET }}
+            ${{ env.ASSET }}.sha256
+
+      - name: Publish GitHub Release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          name: JacksonTechWorks Network Scanner ${{ github.ref_name }}
+          body_path: release-notes/${{ github.ref_name }}.md
+          files: |
+            ${{ env.ASSET }}
+            ${{ env.ASSET }}.sha256

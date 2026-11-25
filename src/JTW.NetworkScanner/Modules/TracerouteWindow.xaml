@@ -1,0 +1,52 @@
+<local:ModuleWindowBase x:Class="JTW.NetworkScanner.Modules.TracerouteWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:local="clr-namespace:JTW.NetworkScanner.Modules"
+        Title="Traceroute / PathPing" Width="1000" Height="620">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <DockPanel>
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                <Button x:Name="StartButton" Content="▶  Start" Style="{StaticResource AccentButton}" MinWidth="90" Click="Start_Click" />
+                <Button Content="Export…" Click="Export_Click" />
+            </StackPanel>
+            <StackPanel Orientation="Horizontal">
+                <Label Content="Target" />
+                <TextBox x:Name="TargetBox" Width="240" KeyDown="TargetBox_KeyDown" ToolTip="Detected host, IP or hostname" />
+                <Label Content="   Max hops" />
+                <TextBox x:Name="MaxHopsBox" Width="45" Text="30" />
+                <RadioButton x:Name="ModeTrace" Content="Traceroute" GroupName="Mode" IsChecked="True" Style="{StaticResource SegmentRadio}" Margin="14,0,0,0" />
+                <RadioButton x:Name="ModePath" Content="PathPing" GroupName="Mode" Style="{StaticResource SegmentRadio}" />
+                <Label Content="   Probes/hop" />
+                <TextBox x:Name="ProbesBox" Width="45" Text="50" ToolTip="PathPing: pings sent to every hop to measure loss" />
+                <CheckBox x:Name="GeoCheck" Content="Geo-locate public hops" IsChecked="True" />
+            </StackPanel>
+        </DockPanel>
+
+        <ProgressBar x:Name="Progress" Grid.Row="1" Margin="0,10" IsIndeterminate="False" />
+
+        <DataGrid x:Name="HopGrid" Grid.Row="2">
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="Hop" Binding="{Binding Ttl}" Width="45" />
+                <DataGridTextColumn Header="Address" Binding="{Binding Address}" Width="120" />
+                <DataGridTextColumn Header="Hostname" Binding="{Binding Hostname}" Width="*" />
+                <DataGridTextColumn Header="RTT" Binding="{Binding RttText}" Width="70" />
+                <DataGridTextColumn Header="Sent" Binding="{Binding Sent}" Width="50" />
+                <DataGridTextColumn Header="Loss" Binding="{Binding LossText}" Width="55" />
+                <DataGridTextColumn Header="Avg" Binding="{Binding AvgText}" Width="75" />
+                <DataGridTextColumn Header="Min / Max" Binding="{Binding MinMaxText}" Width="90" />
+                <DataGridTextColumn Header="Location" Binding="{Binding Location}" Width="150" />
+                <DataGridTextColumn Header="Network" Binding="{Binding Org}" Width="*" />
+            </DataGrid.Columns>
+        </DataGrid>
+
+        <TextBlock x:Name="StatusLine" Grid.Row="3" Style="{StaticResource SubText}" Margin="0,8,0,0"
+                   Text="Traceroute lists each router on the path. PathPing then pings every hop repeatedly to show where loss or latency starts." />
+    </Grid>
+</local:ModuleWindowBase>

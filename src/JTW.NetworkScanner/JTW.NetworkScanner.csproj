@@ -1,0 +1,44 @@
+<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net8.0-windows</TargetFramework>
+    <UseWPF>true</UseWPF>
+    <EnableWindowsTargeting>true</EnableWindowsTargeting>
+    <Nullable>disable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>JTW.NetworkScanner</RootNamespace>
+    <AssemblyName>JTW-NetworkScanner</AssemblyName>
+    <ApplicationIcon>Assets\app.ico</ApplicationIcon>
+
+    <!-- Version is overridden by CI from the git tag (vX.Y.Z) -->
+    <Version>1.0.0</Version>
+    <Product>JacksonTechWorks Network Scanner</Product>
+    <Company>JacksonTechWorks</Company>
+    <Authors>JacksonTechWorks</Authors>
+    <Copyright>© JacksonTechWorks</Copyright>
+    <Description>Portable Windows network scanner and diagnostics toolkit.</Description>
+
+    <!-- Portable, self-contained single exe -->
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    <SelfContained>true</SelfContained>
+    <PublishSingleFile>true</PublishSingleFile>
+    <IncludeNativeLibrariesForSelfExtract>true</IncludeNativeLibrariesForSelfExtract>
+    <EnableCompressionInSingleFile>true</EnableCompressionInSingleFile>
+    <DebugType>embedded</DebugType>
+    <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Microsoft.Web.WebView2" Version="1.0.2903.40" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <EmbeddedResource Include="Assets\oui.txt.gz" LogicalName="oui.txt.gz" />
+    <EmbeddedResource Include="Assets\leaflet.js" LogicalName="leaflet.js" />
+    <EmbeddedResource Include="Assets\leaflet.css" LogicalName="leaflet.css" />
+    <Resource Include="Assets\logo.png" />
+    <Resource Include="Assets\app.ico" />
+  </ItemGroup>
+
+</Project>

@@ -1,0 +1,218 @@
+<Window x:Class="JTW.NetworkScanner.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:modules="clr-namespace:JTW.NetworkScanner.Modules"
+        Style="{StaticResource JtwWindow}"
+        Title="JacksonTechWorks Network Scanner"
+        Width="1320" Height="800" MinWidth="1000" MinHeight="600"
+        WindowStartupLocation="CenterScreen">
+    <Grid Margin="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <!-- Header -->
+        <DockPanel Grid.Row="0" Margin="0,0,0,10">
+            <Image Source="pack://application:,,,/Assets/logo.png" Width="40" Height="40" DockPanel.Dock="Left" Margin="0,0,10,0" />
+            <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                <Button Content="Check for updates" Click="CheckUpdates_Click" />
+                <Button Content="GitHub" Click="GitHub_Click" />
+                <Button Content="About" Click="About_Click" />
+            </StackPanel>
+            <StackPanel VerticalAlignment="Center">
+                <TextBlock FontSize="20" FontWeight="SemiBold">
+                    <Run Text="JacksonTechWorks" Foreground="{StaticResource AccentBrush}" />
+                    <Run Text=" Network Scanner" />
+                </TextBlock>
+                <TextBlock x:Name="VersionText" Style="{StaticResource SubText}" Text="v1.0.0 · portable" />
+            </StackPanel>
+        </DockPanel>
+
+        <!-- Update banner -->
+        <Border x:Name="UpdateBanner" Grid.Row="1" Visibility="Collapsed" Background="#12324A" BorderBrush="{StaticResource AccentBrush}"
+                BorderThickness="1" CornerRadius="6" Padding="10,6" Margin="0,0,0,10">
+            <DockPanel>
+                <StackPanel DockPanel.Dock="Right" Orientation="Horizontal">
+                    <Button x:Name="UpdateNowButton" Content="Update now" Style="{StaticResource AccentButton}" Click="UpdateNow_Click" />
+                    <Button Content="Release notes" Click="ReleaseNotes_Click" />
+                    <Button Content="Skip this version" Click="SkipVersion_Click" />
+                </StackPanel>
+                <StackPanel VerticalAlignment="Center">
+                    <TextBlock x:Name="UpdateText" FontWeight="SemiBold" Text="A new version is available." />
+                    <ProgressBar x:Name="UpdateProgress" Visibility="Collapsed" Maximum="1" Margin="0,4,10,0" />
+                </StackPanel>
+            </DockPanel>
+        </Border>
+
+        <!-- Scan bar -->
+        <Border Grid.Row="2" Style="{StaticResource Card}" Margin="0,0,0,8">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="2*" />
+                    <ColumnDefinition Width="Auto" />
+                    <ColumnDefinition Width="1.2*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                    <RowDefinition Height="Auto" />
+                </Grid.RowDefinitions>
+
+                <Label Content="Interface" />
+                <ComboBox x:Name="AdapterCombo" Grid.Column="1" SelectionChanged="AdapterCombo_SelectionChanged" />
+                <Label Grid.Column="2" Content="  Range" />
+                <TextBox x:Name="RangeBox" Grid.Column="3" ToolTip="CIDR (192.168.1.0/24), range (192.168.1.10-192.168.1.50 or 192.168.1.10-50) or a single IP" KeyDown="RangeBox_KeyDown" />
+                <StackPanel Grid.Column="4" Orientation="Horizontal">
+                    <Button x:Name="ScanButton" Content="▶  Scan" Style="{StaticResource AccentButton}" MinWidth="100" Click="Scan_Click" />
+                    <Button Content="⟳" ToolTip="Refresh interfaces" Click="RefreshAdapters_Click" />
+                </StackPanel>
+
+                <StackPanel Grid.Row="1" Grid.ColumnSpan="5" Orientation="Horizontal" Margin="0,6,0,0">
+                    <CheckBox x:Name="ScanPortsCheck" Content="Scan ports" IsChecked="True" Margin="0,0,10,0" />
+                    <CheckBox x:Name="ResolveCheck" Content="Resolve hostnames" IsChecked="True" Margin="0,0,10,0" />
+                    <Label Content="Ports" />
+                    <TextBox x:Name="PortsBox" Width="520" ToolTip="Comma-separated ports and ranges, e.g. 22,80,443,8000-8100" />
+                    <Button Content="Default ports" Click="DefaultPorts_Click" />
+                </StackPanel>
+
+                <ProgressBar x:Name="ScanProgress" Grid.Row="2" Grid.ColumnSpan="5" Margin="0,8,0,0" Value="0" />
+            </Grid>
+        </Border>
+
+        <!-- Filter bar -->
+        <DockPanel Grid.Row="3" Margin="0,0,0,8" LastChildFill="False">
+            <TextBlock Text="Show" VerticalAlignment="Center" Foreground="{StaticResource SubTextBrush}" Margin="0,0,6,0" />
+            <RadioButton x:Name="FilterAll" Content="All" GroupName="StateFilter" Style="{StaticResource SegmentRadio}" Checked="Filter_Changed" />
+            <RadioButton x:Name="FilterAlive" Content="Online" GroupName="StateFilter" Style="{StaticResource SegmentRadio}" IsChecked="True" Checked="Filter_Changed" />
+            <RadioButton x:Name="FilterOffline" Content="Offline" GroupName="StateFilter" Style="{StaticResource SegmentRadio}" Checked="Filter_Changed" />
+            <TextBlock Text="   Port filter" VerticalAlignment="Center" Foreground="{StaticResource SubTextBrush}" Margin="6,0" />
+            <TextBox x:Name="PortFilterBox" Width="120" ToolTip="Only show hosts with any of these open ports, e.g. 22,443" TextChanged="Filter_TextChanged" />
+            <TextBlock Text="   Search" VerticalAlignment="Center" Foreground="{StaticResource SubTextBrush}" Margin="6,0" />
+            <TextBox x:Name="SearchBox" Width="200" ToolTip="IP, hostname, MAC or vendor" TextChanged="Filter_TextChanged" />
+            <Button DockPanel.Dock="Right" Content="Export PDF" Click="ExportPdf_Click" />
+            <Button DockPanel.Dock="Right" Content="Export CSV" Click="ExportCsv_Click" />
+        </DockPanel>
+
+        <!-- Main -->
+        <Grid Grid.Row="4">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="12" />
+                <ColumnDefinition Width="270" />
+            </Grid.ColumnDefinitions>
+
+            <DataGrid x:Name="HostsGrid" PreviewMouseRightButtonDown="HostsGrid_PreviewMouseRightButtonDown"
+                      MouseDoubleClick="HostsGrid_MouseDoubleClick" ContextMenuOpening="HostsGrid_ContextMenuOpening">
+                <DataGrid.ContextMenu>
+                    <ContextMenu />
+                </DataGrid.ContextMenu>
+                <DataGrid.Columns>
+                    <DataGridTemplateColumn Header="" Width="26" SortMemberPath="State">
+                        <DataGridTemplateColumn.CellTemplate>
+                            <DataTemplate>
+                                <Ellipse Width="10" Height="10" HorizontalAlignment="Center">
+                                    <Ellipse.Style>
+                                        <Style TargetType="Ellipse">
+                                            <Setter Property="Fill" Value="#3A4660" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding State}" Value="Alive">
+                                                    <Setter Property="Fill" Value="{StaticResource GoodBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding State}" Value="Offline">
+                                                    <Setter Property="Fill" Value="{StaticResource BadBrush}" />
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding State}" Value="Scanning">
+                                                    <Setter Property="Fill" Value="{StaticResource WarnBrush}" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Ellipse.Style>
+                                </Ellipse>
+                            </DataTemplate>
+                        </DataGridTemplateColumn.CellTemplate>
+                    </DataGridTemplateColumn>
+                    <DataGridTextColumn Header="IP address" Binding="{Binding Ip}" SortMemberPath="IpSort" Width="115" />
+                    <DataGridTextColumn Header="Status" Binding="{Binding StatusText}" Width="75" />
+                    <DataGridTextColumn Header="Hostname" Binding="{Binding Hostname}" Width="1.2*" />
+                    <DataGridTextColumn Header="Role" Binding="{Binding Role}" Width="70" />
+                    <DataGridTextColumn Header="MAC address" Binding="{Binding Mac}" Width="130" />
+                    <DataGridTextColumn Header="Vendor" Binding="{Binding Vendor}" Width="1.2*" />
+                    <DataGridTextColumn Header="Latency" Binding="{Binding LatencyText}" SortMemberPath="LatencyMs" Width="70" />
+                    <DataGridTextColumn Header="Open ports" Binding="{Binding PortsText}" Width="2*" />
+                    <DataGridTextColumn Header="Found by" Binding="{Binding DetectedBy}" Width="75" />
+                </DataGrid.Columns>
+            </DataGrid>
+
+            <!-- Side panel -->
+            <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
+                <StackPanel>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition />
+                            <ColumnDefinition Width="8" />
+                            <ColumnDefinition />
+                        </Grid.ColumnDefinitions>
+                        <Border Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Hosts alive" Style="{StaticResource SubText}" />
+                                <TextBlock x:Name="AliveCount" Text="0" Style="{StaticResource StatValue}" Foreground="{StaticResource GoodBrush}" />
+                            </StackPanel>
+                        </Border>
+                        <Border Grid.Column="2" Style="{StaticResource Card}">
+                            <StackPanel>
+                                <TextBlock Text="Not alive" Style="{StaticResource SubText}" />
+                                <TextBlock x:Name="DeadCount" Text="0" Style="{StaticResource StatValue}" Foreground="{StaticResource BadBrush}" />
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <TextBlock Text="DIAGNOSTIC MODULES" Style="{StaticResource SectionHeader}" />
+                    <Button Style="{StaticResource ModuleButton}" Content="📈  Live Ping + route map" Click="OpenLivePing_Click" />
+                    <Button Style="{StaticResource ModuleButton}" Content="🧭  Traceroute" Click="OpenTraceroute_Click" />
+                    <Button Style="{StaticResource ModuleButton}" Content="📊  PathPing (per-hop loss)" Click="OpenPathPing_Click" />
+                    <Button Style="{StaticResource ModuleButton}" Content="⚡  LAN Speed Test" Click="OpenSpeedTest_Click" />
+                    <Button Style="{StaticResource ModuleButton}" Content="⏻  Wake-on-LAN" Click="OpenWol_Click" />
+
+                    <TextBlock Text="RUNNING MODULES" Style="{StaticResource SectionHeader}" />
+                    <TextBlock x:Name="NoModulesText" Text="No modules open. Diagnostics keep running when you close their window — find them here." TextWrapping="Wrap" Style="{StaticResource SubText}" />
+                    <modules:ModuleListControl x:Name="ModulesList">
+                        <modules:ModuleListControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border Style="{StaticResource Card}" Margin="0,0,0,6" Padding="8">
+                                    <DockPanel>
+                                        <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
+                                            <Button Content="Show" Padding="8,3" Click="ModuleShow_Click" Tag="{Binding}" />
+                                            <Button Content="✕" Padding="8,3" ToolTip="Stop and close" Click="ModuleClose_Click" Tag="{Binding}" />
+                                        </StackPanel>
+                                        <StackPanel>
+                                            <TextBlock Text="{Binding Title}" FontWeight="SemiBold" TextTrimming="CharacterEllipsis" />
+                                            <TextBlock Text="{Binding StateText}" Style="{StaticResource SubText}" />
+                                            <TextBlock Text="{Binding Summary}" Style="{StaticResource SubText}" TextTrimming="CharacterEllipsis" />
+                                        </StackPanel>
+                                    </DockPanel>
+                                </Border>
+                            </DataTemplate>
+                        </modules:ModuleListControl.ItemTemplate>
+                    </modules:ModuleListControl>
+
+                    <TextBlock Text="TIP" Style="{StaticResource SectionHeader}" />
+                    <TextBlock TextWrapping="Wrap" Style="{StaticResource SubText}"
+                               Text="Right-click a host to open its services (web, SSH, RDP, shares), run diagnostics against it or send Wake-on-LAN. Double-click opens the first web/remote service found." />
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+
+        <!-- Status bar -->
+        <DockPanel Grid.Row="5" Margin="0,8,0,0">
+            <TextBlock x:Name="OuiText" DockPanel.Dock="Right" Style="{StaticResource SubText}" />
+            <TextBlock x:Name="StatusText" Style="{StaticResource SubText}" Text="Ready." />
+        </DockPanel>
+    </Grid>
+</Window>
