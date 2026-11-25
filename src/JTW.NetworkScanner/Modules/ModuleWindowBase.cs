@@ -93,16 +93,43 @@ public class ModuleWindowBase : Window, INotifyPropertyChanged
         MessageBox.Show(message, AppInfo.ProductName, MessageBoxButton.OK, MessageBoxImage.Warning);
 }
 
+/// <summary>View-model wrapper so module windows can be listed in the main window (a Window can't be an item in a visual tree).</summary>
+public class ModuleEntry : INotifyPropertyChanged
+{
+    public event PropertyChangedEventHandler PropertyChanged;
+    public ModuleWindowBase Module { get; }
+
+    public ModuleEntry(ModuleWindowBase module)
+    {
+        Module = module;
+        module.PropertyChanged += (_, e) => Raise(e.PropertyName);
+        DependencyPropertyDescriptor.FromProperty(Window.TitleProperty, typeof(Window))
+            ?.AddValueChanged(module, (_, _) => Raise(nameof(Title)));
+    }
+
+    public string Title => Module.Title;
+    public string StateText => Module.StateText;
+    public string Summary => Module.Summary;
+
+    private void Raise(string name) => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(name));
+}
+
 public static class ModuleManager
 {
-    public static ObservableCollection<ModuleWindowBase> Modules { get; } = new();
+    public static ObservableCollection<ModuleEntry> Modules { get; } = new();
 
     internal static void Register(ModuleWindowBase w)
     {
-        if (!Modules.Contains(w)) Modules.Add(w);
+        if (!Modules.Any(m => m.Module == w)) Modules.Add(new ModuleEntry(w));
     }
 
-    internal static void Unregister(ModuleWindowBase w) => Modules.Remove(w);
+    internal static void Unregister(ModuleWindowBase w)
+    {
+        var e = Modules.FirstOrDefault(m => m.Module == w);
+        if (e != null) Modules.Remove(e);
+    }
+
+    public static bool AnyRunning => Modules.Any(m => m.Module.IsRunning);
 
     public static T Open<T>(Window owner, Action<T> configure = null) where T : ModuleWindowBase, new()
     {
@@ -115,6 +142,6 @@ public static class ModuleManager
 
     public static void CloseAll()
     {
-        foreach (var m in Modules.ToList()) m.ForceClose();
+        foreach (var m in Modules.ToList()) m.Module.ForceClose();
     }
 }

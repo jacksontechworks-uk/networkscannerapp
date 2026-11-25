@@ -215,12 +215,3 @@ function setRoute(pts){
 """;
 }
 
-/// <summary>
-/// ItemsControl that never treats its items as their own containers (the running-module list holds Window objects,
-/// which can't be placed in a visual tree).
-/// </summary>
-public class ModuleListControl : ItemsControl
-{
-    protected override bool IsItemItsOwnContainerOverride(object item) => false;
-    protected override DependencyObject GetContainerForItemOverride() => new ContentPresenter();
-}

@@ -395,8 +395,8 @@ public partial class MainWindow : Window
         w.Prefill(h?.Mac, h?.Hostname, adapter != null ? NetUtil.GetBroadcast(adapter).ToString() : "255.255.255.255");
     });
 
-    private void ModuleShow_Click(object sender, RoutedEventArgs e) => ((sender as FrameworkElement)?.Tag as ModuleWindowBase)?.Retrieve();
-    private void ModuleClose_Click(object sender, RoutedEventArgs e) => ((sender as FrameworkElement)?.Tag as ModuleWindowBase)?.ForceClose();
+    private void ModuleShow_Click(object sender, RoutedEventArgs e) => ((sender as FrameworkElement)?.Tag as ModuleEntry)?.Module.Retrieve();
+    private void ModuleClose_Click(object sender, RoutedEventArgs e) => ((sender as FrameworkElement)?.Tag as ModuleEntry)?.Module.ForceClose();
 
     private void UpdateModulesHint() =>
         NoModulesText.Visibility = ModuleManager.Modules.Count == 0 ? Visibility.Visible : Visibility.Collapsed;
@@ -430,7 +430,7 @@ public partial class MainWindow : Window
     private async void UpdateNow_Click(object sender, RoutedEventArgs e)
     {
         if (_pendingUpdate == null) return;
-        if (ModuleManager.Modules.Any(m => m.IsRunning) &&
+        if (ModuleManager.AnyRunning &&
             MessageBox.Show("Some diagnostics are still running and will be stopped by the update. Continue?", AppInfo.ProductName,
                 MessageBoxButton.YesNo, MessageBoxImage.Question) != MessageBoxResult.Yes) return;
 

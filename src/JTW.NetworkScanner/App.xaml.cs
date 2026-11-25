@@ -10,6 +10,9 @@ public partial class App : Application
     {
         base.OnStartup(e);
 
+        // The scanner runs many short blocking ARP calls in parallel; avoid slow thread-pool ramp-up.
+        ThreadPool.SetMinThreads(256, 256);
+
         DispatcherUnhandledException += OnDispatcherUnhandledException;
         TaskScheduler.UnobservedTaskException += (_, args) => { Log.Error("Unobserved task exception", args.Exception); args.SetObserved(); };
 
