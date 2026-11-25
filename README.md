@@ -121,7 +121,7 @@ src/JTW.NetworkScanner/
 
 1. Bump `<Version>` in `src/JTW.NetworkScanner/JTW.NetworkScanner.csproj`.
 2. Add `release-notes/vX.Y.Z.md` and update the **Current release** section of this README.
-3. Tag the commit and push it: `git tag vX.Y.Z && git push origin vX.Y.Z`
+3. Either push a tag (`git tag vX.Y.Z && git push origin vX.Y.Z`) **or** go to **Actions → Build & Release → Run workflow**, tick **Publish a GitHub Release**, and run it.
 
 GitHub Actions builds the self-contained exe on Windows and publishes the release with `JTW-NetworkScanner-win-x64.zip` and its `.sha256`. Running copies pick it up automatically.
 
