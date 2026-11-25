@@ -24,7 +24,15 @@ Settings and logs are saved in a `JTW-Data` folder next to the exe, so the app s
 
 ---
 
-## Current release: v1.0.0
+## Current release: v1.1.0
+
+### 🆕 New in v1.1.0
+- **Settings menu** (⚙ Settings ▾ in the header) with **DNS**, **General** and **Updates** pages.
+- **DNS switcher**: see the current DNS on any adapter, then switch it to **Automatic (DHCP)**, **Quad9**, Quad9 unfiltered, **Cloudflare**, Cloudflare malware or family filtering, **Google**, **OpenDNS**, **AdGuard** or your own **custom** servers (Pi-hole, domain controller and so on). It sets IPv4 and, optionally, IPv6. It shows a UAC prompt because the change needs admin rights, and flushes the DNS cache afterwards.
+- **DNS benchmark**: times a real lookup against every provider so you can choose the fastest from where you are.
+- **Flush DNS cache** button.
+- **General settings**: default SSH username, ping and port timeouts, speed-test port and default port list.
+- **In-app updates**: the app now also re-checks every 6 hours while it's open. The Updates page shows the last check and has a *Check now* button and an auto-check toggle. You don't need to download new versions from GitHub manually.
 
 ### ✅ What's working in this release
 
@@ -66,8 +74,12 @@ Settings and logs are saved in a `JTW-Data` folder next to the exe, so the app s
 - Scan results, Live Ping (samples or route table), Traceroute/PathPing, speed test history and the Wake-on-LAN log can all be exported to **PDF** (branded report) or **CSV**.
 - Exports respect the current filter.
 
+**Settings & DNS** (new in v1.1.0)
+- Switch DNS per adapter between DHCP, Quad9, Cloudflare, Google, OpenDNS, AdGuard and custom servers (IPv4 + IPv6), with a resolver benchmark and a cache flush.
+- General settings for timeouts, SSH user, ports and the speed-test port.
+
 **Self-update**
-- On startup, the app checks this repo's GitHub Releases. When a newer version exists, a banner offers **Update now**.
+- On startup and every 6 hours, the app checks this repo's GitHub Releases. When a newer version exists, a banner offers **Update now**.
 - The update downloads the release zip, **verifies its SHA-256**, replaces the exe and any other files, and restarts. You can also skip a version or check manually.
 
 ### 🚧 Up & coming
@@ -81,7 +93,8 @@ Settings and logs are saved in a `JTW-Data` folder next to the exe, so the app s
 - Speed test: parallel streams, UDP jitter/loss mode, and latency under load
 - Wake-on-LAN address book
 - IPv6 support
-- Settings window (timeouts, concurrency, theme)
+- More settings: scan concurrency, light/dark theme
+- DNS-over-HTTPS (DoH) setup on Windows 11
 - Code-signed releases
 
 ---
@@ -131,6 +144,7 @@ GitHub Actions builds the self-contained exe on Windows and publishes the releas
 
 | Version | Date | Highlights |
 |---|---|---|
+| v1.1.0 | 2026-11-25 | Settings menu, DNS switcher (Quad9/Cloudflare/Google/OpenDNS/AdGuard/DHCP/custom), DNS benchmark & flush, general settings, 6-hourly update checks |
 | v1.0.0 | 2026-11-25 | First release: subnet scan, ARP, ports, vendors, filters, right-click launchers, Live Ping + route map, Traceroute, PathPing, LAN speed test, Wake-on-LAN, PDF/CSV export, self-update |
 
 ## Credits

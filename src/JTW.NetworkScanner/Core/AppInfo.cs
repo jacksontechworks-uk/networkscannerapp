@@ -100,6 +100,7 @@ public class AppSettings
     public int SpeedTestPort { get; set; } = 5201;
     public string LastRange { get; set; } = "";
     public string SkippedVersion { get; set; } = "";
+    public string LastUpdateCheck { get; set; } = "";
 
     public static AppSettings Current { get; private set; } = new();
 

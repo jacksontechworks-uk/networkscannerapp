@@ -19,7 +19,17 @@
         <DockPanel Grid.Row="0" Margin="0,0,0,10">
             <Image Source="pack://application:,,,/Assets/logo.png" Width="40" Height="40" DockPanel.Dock="Left" Margin="0,0,10,0" />
             <StackPanel DockPanel.Dock="Right" Orientation="Horizontal" VerticalAlignment="Center">
-                <Button Content="Check for updates" Click="CheckUpdates_Click" />
+                <Button x:Name="SettingsButton" Content="⚙  Settings  ▾" Click="SettingsMenu_Click">
+                    <Button.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="🌐  DNS settings…" Click="SettingsDns_Click" />
+                            <MenuItem Header="⚙  General settings…" Click="SettingsGeneral_Click" />
+                            <MenuItem Header="⬆  Updates…" Click="SettingsUpdates_Click" />
+                            <Separator />
+                            <MenuItem Header="Check for updates now" Click="CheckUpdates_Click" />
+                        </ContextMenu>
+                    </Button.ContextMenu>
+                </Button>
                 <Button Content="GitHub" Click="GitHub_Click" />
                 <Button Content="About" Click="About_Click" />
             </StackPanel>

@@ -19,6 +19,7 @@ public partial class MainWindow : Window
     private ListCollectionView _view;
     private CancellationTokenSource _scanCts;
     private readonly DispatcherTimer _uiTimer;
+    private readonly DispatcherTimer _updateTimer;
     private readonly Stopwatch _scanClock = new();
     private string _lastScanRange = "";
     private UpdateInfo _pendingUpdate;
@@ -52,6 +53,15 @@ public partial class MainWindow : Window
             await Task.Run(OuiDatabase.EnsureLoaded);
             OuiText.Text = $"Vendor database: {OuiDatabase.Count:N0} manufacturers";
             if (AppSettings.Current.CheckForUpdatesOnStartup) await CheckForUpdatesAsync(silent: true);
+            _updateTimer.Start();
+        };
+
+        // Keep checking while the app is left open (e.g. on a tech's PC all day).
+        _updateTimer = new DispatcherTimer { Interval = TimeSpan.FromHours(6) };
+        _updateTimer.Tick += async (_, _) =>
+        {
+            if (AppSettings.Current.CheckForUpdatesOnStartup && UpdateBanner.Visibility != Visibility.Visible)
+                await CheckForUpdatesAsync(silent: true);
         };
     }
 
@@ -403,29 +413,62 @@ public partial class MainWindow : Window
 
     // ---------------------------------------------------------------- Updates / about
 
-    private async Task CheckForUpdatesAsync(bool silent)
+    /// <summary>Checks GitHub Releases. Shows the update banner when a newer version exists. Returns a status line.</summary>
+    private async Task<string> CheckForUpdatesAsync(bool silent, bool showDialogs = false)
     {
         try
         {
             var info = await Updater.CheckAsync();
+            AppSettings.Current.LastUpdateCheck = DateTime.Now.ToString("dd MMM yyyy HH:mm");
+            AppSettings.Save();
             if (info == null)
             {
-                if (!silent) MessageBox.Show($"You're on the latest version ({AppInfo.VersionText}).", AppInfo.ProductName);
-                return;
+                var msg = $"You're on the latest version ({AppInfo.VersionText}).";
+                if (showDialogs) MessageBox.Show(msg, AppInfo.ProductName);
+                return msg;
             }
-            if (silent && AppSettings.Current.SkippedVersion == info.Tag) return;
+            if (silent && AppSettings.Current.SkippedVersion == info.Tag) return $"Version {info.Tag} was skipped.";
             _pendingUpdate = info;
             UpdateText.Text = $"Version {info.Tag} is available (you have {AppInfo.VersionText}).";
             UpdateBanner.Visibility = Visibility.Visible;
+            UpdateNowButton.IsEnabled = true;
+            if (showDialogs &&
+                MessageBox.Show($"Version {info.Tag} is available (you have {AppInfo.VersionText}).\n\nInstall it now? The app will restart.",
+                    AppInfo.ProductName, MessageBoxButton.YesNo, MessageBoxImage.Question) == MessageBoxResult.Yes)
+                UpdateNow_Click(this, new RoutedEventArgs());
+            return $"Version {info.Tag} is available. Press \"Update now\" in the banner on the main window to install it.";
         }
         catch (Exception ex)
         {
             Log.Error("Update check failed", ex);
-            if (!silent) MessageBox.Show("Couldn't check for updates: " + ex.Message, AppInfo.ProductName);
+            var msg = "Couldn't check for updates: " + ex.Message;
+            if (showDialogs) MessageBox.Show(msg, AppInfo.ProductName);
+            return msg;
         }
     }
 
-    private async void CheckUpdates_Click(object sender, RoutedEventArgs e) => await CheckForUpdatesAsync(silent: false);
+    private async void CheckUpdates_Click(object sender, RoutedEventArgs e) => await CheckForUpdatesAsync(silent: false, showDialogs: true);
+
+    // ---------------------------------------------------------------- Settings menu
+
+    private void SettingsMenu_Click(object sender, RoutedEventArgs e)
+    {
+        var menu = SettingsButton.ContextMenu;
+        menu.PlacementTarget = SettingsButton;
+        menu.Placement = System.Windows.Controls.Primitives.PlacementMode.Bottom;
+        menu.IsOpen = true;
+    }
+
+    private void OpenSettings(SettingsWindow.Page page)
+    {
+        var w = new SettingsWindow(page, silent => CheckForUpdatesAsync(silent)) { Owner = this };
+        w.SettingsChanged += () => PortsBox.Text = AppSettings.Current.Ports;
+        w.ShowDialog();
+    }
+
+    private void SettingsDns_Click(object sender, RoutedEventArgs e) => OpenSettings(SettingsWindow.Page.Dns);
+    private void SettingsGeneral_Click(object sender, RoutedEventArgs e) => OpenSettings(SettingsWindow.Page.General);
+    private void SettingsUpdates_Click(object sender, RoutedEventArgs e) => OpenSettings(SettingsWindow.Page.Updates);
 
     private async void UpdateNow_Click(object sender, RoutedEventArgs e)
     {

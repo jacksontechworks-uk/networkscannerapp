@@ -12,7 +12,7 @@
     <ApplicationIcon>Assets\app.ico</ApplicationIcon>
 
     <!-- Version is overridden by CI from the git tag (vX.Y.Z) -->
-    <Version>1.0.0</Version>
+    <Version>1.1.0</Version>
     <Product>JacksonTechWorks Network Scanner</Product>
     <Company>JacksonTechWorks</Company>
     <Authors>JacksonTechWorks</Authors>
